@@ -30,6 +30,7 @@ class ViewController: NSViewController {
   let sizeFormatter = ByteCountFormatter()
   var directory: Directory?
   var directoryItems: [Metadata]?
+  var movies = [Metadata]()
   var sortOrder = Directory.FileOrder.Name
   var sortAscending = true
 
@@ -50,23 +51,29 @@ class ViewController: NSViewController {
       }
     }
   }
+  
+  @IBAction func removeFile(_ sender: Any) {
+    print("selected \(tableView.selectedRowIndexes)");
+    movies = movies.enumerated()
+      .filter { !tableView.selectedRowIndexes.contains($0.offset) }
+      .map { $0.element }
+    reloadFileList()
+  }
+  
+  
   @IBAction func addFile(_ sender: Any) {
     let dialog = NSOpenPanel();
-    dialog.title                   = "Choose a movie file";
+    dialog.title                   = "Choose movie files";
     dialog.showsResizeIndicator    = true;
     dialog.showsHiddenFiles        = false;
-    dialog.canChooseDirectories    = true;
+    dialog.canChooseDirectories    = false;
     dialog.canCreateDirectories    = true;
     dialog.allowsMultipleSelection = true;
     //dialog.allowedFileTypes        = ["txt"];
     
     if (dialog.runModal() == NSModalResponseOK) {
-      let result = dialog.url // Pathname of the file
-      
-      if (result != nil) {
-        let path = result!.path
-        print("picked movie \(path)")
-      }
+      movies += dialog.urls.map { urlToMetaData(url: $0)! }
+      reloadFileList();
     } else {
       // User clicked on "Cancel"
       return
@@ -74,7 +81,7 @@ class ViewController: NSViewController {
   }
   
   func reloadFileList() {
-    directoryItems = directory?.contentsOrderedBy(sortOrder, ascending: sortAscending)
+    //directoryItems = directory?.contentsOrderedBy(sortOrder, ascending: sortAscending)
     tableView.reloadData()
   }
   
@@ -122,7 +129,7 @@ class ViewController: NSViewController {
 
 extension ViewController: NSTableViewDataSource {
   func numberOfRows(in tableView: NSTableView) -> Int {
-    return directoryItems?.count ?? 0
+    return movies.count ?? 0
   }
 }
 
@@ -144,9 +151,7 @@ extension ViewController: NSTableViewDelegate {
     dateFormatter.timeStyle = .long
     
     // 1
-    guard let item = directoryItems?[row] else {
-      return nil
-    }
+    let item = movies[row]
     
     // 2
     if tableColumn == tableView.tableColumns[0] {

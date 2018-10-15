@@ -21,6 +21,7 @@
  */
 
 import Cocoa
+import Quartz.QuickLookUI
 
 class ViewController: NSViewController {
 
@@ -52,7 +53,15 @@ class ViewController: NSViewController {
     }
   }
   
-  @IBAction func removeFile(_ sender: Any) {
+  @IBAction func previewFile(_ sender: Any) {
+    if let panel = QLPreviewPanel.shared() {
+      panel.delegate = self
+      panel.dataSource = self
+      panel.makeKeyAndOrderFront(self)
+    }
+  }
+  
+  @IBAction func removeFiles(_ sender: Any) {
     print("selected \(tableView.selectedRowIndexes)");
     movies = movies.enumerated()
       .filter { !tableView.selectedRowIndexes.contains($0.offset) }
@@ -127,9 +136,20 @@ class ViewController: NSViewController {
   }
 }
 
+extension ViewController: QLPreviewPanelDataSource {
+  func previewPanel(_ panel: QLPreviewPanel!, previewItemAt index: Int) -> QLPreviewItem! {
+    return movies[tableView.selectedRowIndexes.sorted()[index]].url as QLPreviewItem
+  }
+  
+  func numberOfPreviewItems(in panel: QLPreviewPanel!) -> Int {
+    return tableView.numberOfSelectedRows
+  }
+  
+}
+
 extension ViewController: NSTableViewDataSource {
   func numberOfRows(in tableView: NSTableView) -> Int {
-    return movies.count ?? 0
+    return movies.count
   }
 }
 

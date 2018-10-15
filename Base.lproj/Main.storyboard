@@ -841,9 +841,19 @@
                                                     <action selector="removeFile:" target="XfG-lQ-9wD" id="s0R-11-PKl"/>
                                                 </connections>
                                             </button>
+                                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b2J-10-fsT">
+                                                <rect key="frame" x="330" y="13" width="88" height="32"/>
+                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                <buttonCell key="cell" type="push" title="Preview" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="BYu-KO-6py">
+                                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                    <font key="font" metaFont="system"/>
+                                                </buttonCell>
+                                                <connections>
+                                                    <action selector="previewFile:" target="XfG-lQ-9wD" id="vXp-Xx-Rjq"/>
+                                                </connections>
+                                            </button>
                                         </subviews>
                                         <constraints>
-                                            <constraint firstAttribute="bottom" secondItem="cKO-NM-5bh" secondAttribute="bottom" constant="20" id="21C-TY-nw5"/>
                                             <constraint firstAttribute="bottom" secondItem="cKO-NM-5bh" secondAttribute="bottom" constant="60" id="57i-WB-6Wb"/>
                                             <constraint firstItem="cKO-NM-5bh" firstAttribute="leading" secondItem="zYh-2E-kcH" secondAttribute="leading" constant="20" id="6v7-PB-WY5"/>
                                             <constraint firstAttribute="trailing" secondItem="cKO-NM-5bh" secondAttribute="trailing" constant="20" id="He1-0g-2KI"/>

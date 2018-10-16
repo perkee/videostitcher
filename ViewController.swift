@@ -66,6 +66,27 @@ class ViewController: NSViewController {
     reloadFileList()
   }
   
+  @IBAction func concatenate(_ sender: Any) {
+    if movies.isEmpty {
+      return
+    }
+
+    let dialog = NSSavePanel();
+    dialog.title = "Choose output video file location"
+    dialog.showsResizeIndicator    = true
+    dialog.showsHiddenFiles        = false
+    dialog.canCreateDirectories    = true
+    dialog.isExtensionHidden = true
+
+    if dialog.runModal() == NSModalResponseOK {
+      let paths = movies.map { $0.url.path }.joined(separator: "\" \"")
+      let dest = "\(dialog.url!.path).\(movies[0].url.pathExtension)"
+      print("/usr/local/bin/ffmpeg -copytb 1 -f concat -i <(for f in \"\( paths )\"; do echo \"file '$f'\"; done) -c copy \"\( dest )\";")
+    } else {
+      // User clicked on "Cancel"
+      return
+    }
+  }
   
   @IBAction func addFile(_ sender: Any) {
     let dialog = NSOpenPanel();
@@ -76,7 +97,7 @@ class ViewController: NSViewController {
     dialog.canCreateDirectories    = true;
     dialog.allowsMultipleSelection = true;
     //dialog.allowedFileTypes        = ["txt"];
-    
+
     if (dialog.runModal() == NSModalResponseOK) {
       movies += dialog.urls.map { urlToMetaData(url: $0)! }
       reloadFileList();
@@ -86,6 +107,13 @@ class ViewController: NSViewController {
     }
   }
   
+  override func keyDown(with event: NSEvent) {
+    print("key down \(event.keyCode) \(event.isARepeat)");
+    if !event.isARepeat && event.keyCode == 49 {
+      previewFile(sender: self)
+    }
+  }
+
   func reloadFileList() {
     //directoryItems = directory?.contentsOrderedBy(sortOrder, ascending: sortAscending)
     tableView.reloadData()

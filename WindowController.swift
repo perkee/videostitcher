@@ -29,14 +29,18 @@ class WindowController: NSWindowController {
 
     let openPanel = NSOpenPanel()
     openPanel.showsHiddenFiles = false
-    openPanel.canChooseFiles = false
-    openPanel.canChooseDirectories = true
+    openPanel.canChooseFiles = true
+    openPanel.canChooseDirectories = false
+    openPanel.title                   = "Choose movie files"
+    openPanel.showsResizeIndicator    = true
+    openPanel.canCreateDirectories    = true
+    openPanel.allowsMultipleSelection = true
 
     openPanel.beginSheetModal(for: self.window!) { response in
-      guard response == NSFileHandlingPanelOKButton else {
+      guard response == NSModalResponseOK else {
         return
       }
-      self.contentViewController?.representedObject = openPanel.url
+      self.contentViewController?.representedObject = openPanel.urls
     }
   }
 

@@ -26,28 +26,25 @@ import Quartz.QuickLookUI
 class ViewController: NSViewController {
 
   @IBOutlet weak var statusLabel: NSTextField!
-
+  @IBOutlet var dropzone: DropzoneView!
+  
   @IBOutlet var tableView: NSTableView!
   let sizeFormatter = ByteCountFormatter()
-  var directory: Directory?
-  var directoryItems: [Metadata]?
   var movies = [Metadata]()
-  var sortOrder = Directory.FileOrder.Name
-  var sortAscending = true
 
   override func viewDidLoad() {
     super.viewDidLoad()
     statusLabel.stringValue = ""
     tableView.delegate = self
     tableView.dataSource = self
-    tableView.register(forDraggedTypes: ["public.data"])
+    // tableView.register(forDraggedTypes: ["public.data"])
+    dropzone.filesReceiver = self
   }
 
   override var representedObject: Any? {
     didSet {
-      if let url = representedObject as? URL {
-        print("Represented object: \(url)")
-        directory = Directory(folderURL: url)
+      if let urls = representedObject as? [URL] {
+        movies += urls.map { urlToMetaData(url: $0)! }
         reloadFileList()
       }
     }

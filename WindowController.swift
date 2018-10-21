@@ -35,6 +35,7 @@ class WindowController: NSWindowController {
     openPanel.showsResizeIndicator    = true
     openPanel.canCreateDirectories    = true
     openPanel.allowsMultipleSelection = true
+    openPanel.allowedFileTypes        = ["public.movie"];
 
     openPanel.beginSheetModal(for: self.window!) { response in
       guard response == NSModalResponseOK else {

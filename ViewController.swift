@@ -25,6 +25,18 @@
 import Cocoa
 import Quartz.QuickLookUI
 
+func formatDuration (duration: Double) -> String {
+  let durationFormatter = DateComponentsFormatter()
+  durationFormatter.unitsStyle = .positional
+  durationFormatter.allowsFractionalUnits = true
+  durationFormatter.zeroFormattingBehavior = .pad
+  durationFormatter.includesApproximationPhrase = false
+  durationFormatter.includesTimeRemainingPhrase = false
+  durationFormatter.allowedUnits = [ .hour, .minute, .second ]
+
+  return durationFormatter.string(from: duration) ?? ""
+}
+
 class ViewController: NSViewController {
 
   @IBOutlet weak var statusLabel: NSTextField!
@@ -123,7 +135,12 @@ class ViewController: NSViewController {
 
   func reloadFileList() {
     tableView.reloadData()
-    statusBar.stringValue = "\(movies.count) movies"
+    let totalDuration = movies.reduce(0) {sum, movie in sum + movie.duration}
+    let totalSize = movies.reduce(0) {sum, movie in sum + movie.size}
+
+    let durationText = formatDuration(duration: totalDuration)
+    let sizeText = ByteCountFormatter().string(fromByteCount: totalSize)
+    statusBar.stringValue = "\(movies.count) movies, \(durationText), \(sizeText)"
   }
   
   // MARK: Allow Drag Operation
@@ -218,15 +235,7 @@ extension ViewController: NSTableViewDelegate {
       text = item.isFolder ? "--" : sizeFormatter.string(fromByteCount: item.size)
       cellIdentifier = CellIdentifiers.SizeCell
     } else if tableColumn == tableView.tableColumns[3] {
-      let durationFormatter = DateComponentsFormatter()
-      durationFormatter.unitsStyle = .positional
-      durationFormatter.allowsFractionalUnits = true
-      durationFormatter.zeroFormattingBehavior = .pad
-      durationFormatter.includesApproximationPhrase = false
-      durationFormatter.includesTimeRemainingPhrase = false
-      durationFormatter.allowedUnits = [ .hour, .minute, .second ]
-
-      text = durationFormatter.string(from: item.duration) ?? "???"
+      text = formatDuration(duration: item.duration)
       cellIdentifier = CellIdentifiers.DurationCell
     }
     

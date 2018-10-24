@@ -31,8 +31,9 @@ class ViewController: NSViewController {
   @IBOutlet var dropzone: DropzoneView!
   
   @IBOutlet var tableView: NSTableView!
-  let sizeFormatter = ByteCountFormatter()
   var movies = [Metadata]()
+
+  @IBOutlet var statusBar: NSTextField!
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -122,6 +123,7 @@ class ViewController: NSViewController {
 
   func reloadFileList() {
     tableView.reloadData()
+    statusBar.stringValue = "\(movies.count) movies"
   }
   
   // MARK: Allow Drag Operation
@@ -185,6 +187,7 @@ extension ViewController: NSTableViewDelegate {
     static let NameCell = "NameCellID"
     static let DateCell = "DateCellID"
     static let SizeCell = "SizeCellID"
+    static let DurationCell = "DurationCellID"
   }
   
   func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
@@ -193,9 +196,6 @@ extension ViewController: NSTableViewDelegate {
     var text: String = ""
     var cellIdentifier: String = ""
     
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateStyle = .long
-    dateFormatter.timeStyle = .long
     
     // 1
     let item = movies[row]
@@ -206,11 +206,28 @@ extension ViewController: NSTableViewDelegate {
       text = item.name
       cellIdentifier = CellIdentifiers.NameCell
     } else if tableColumn == tableView.tableColumns[1] {
+      let dateFormatter = DateFormatter()
+      dateFormatter.dateStyle = .short
+      dateFormatter.timeStyle = .short
+
       text = dateFormatter.string(from: item.date)
       cellIdentifier = CellIdentifiers.DateCell
     } else if tableColumn == tableView.tableColumns[2] {
+      let sizeFormatter = ByteCountFormatter()
+
       text = item.isFolder ? "--" : sizeFormatter.string(fromByteCount: item.size)
       cellIdentifier = CellIdentifiers.SizeCell
+    } else if tableColumn == tableView.tableColumns[3] {
+      let durationFormatter = DateComponentsFormatter()
+      durationFormatter.unitsStyle = .positional
+      durationFormatter.allowsFractionalUnits = true
+      durationFormatter.zeroFormattingBehavior = .pad
+      durationFormatter.includesApproximationPhrase = false
+      durationFormatter.includesTimeRemainingPhrase = false
+      durationFormatter.allowedUnits = [ .hour, .minute, .second ]
+
+      text = durationFormatter.string(from: item.duration) ?? "???"
+      cellIdentifier = CellIdentifiers.DurationCell
     }
     
     // 3

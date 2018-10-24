@@ -21,6 +21,7 @@
  */
 
 import AppKit
+import CoreData
 
 public struct Metadata: CustomDebugStringConvertible, Equatable {
 
@@ -31,8 +32,9 @@ public struct Metadata: CustomDebugStringConvertible, Equatable {
   let color: NSColor
   let isFolder: Bool
   let url: URL
+  let duration: Double
 
-  init(fileURL: URL, name: String, date: Date, size: Int64, icon: NSImage, isFolder: Bool, color: NSColor ) {
+  init(fileURL: URL, name: String, date: Date, size: Int64, icon: NSImage, isFolder: Bool, color: NSColor, duration: Double ) {
     self.name = name
     self.date = date
     self.size = size
@@ -40,6 +42,7 @@ public struct Metadata: CustomDebugStringConvertible, Equatable {
     self.color = color
     self.isFolder = isFolder
     self.url = fileURL
+    self.duration = duration
   }
 
   public var debugDescription: String {
@@ -63,13 +66,17 @@ public func urlToMetaData(url: URL) -> Metadata? {
   ]
   do {
     let properties = try  (url as NSURL).resourceValues(forKeys: requiredAttributes)
+    let md = MDItemCreateWithURL(nil, (url as CFURL))
+    let dur = MDItemCopyAttribute(md, kMDItemDurationSeconds)
     return Metadata(fileURL: url,
-                    name: properties[URLResourceKey.localizedNameKey] as? String ?? "",
-                    date: properties[URLResourceKey.contentModificationDateKey] as? Date ?? Date.distantPast,
-                    size: (properties[URLResourceKey.fileSizeKey] as? NSNumber)?.int64Value ?? 0,
-                    icon: properties[URLResourceKey.effectiveIconKey] as? NSImage  ?? NSImage(),
-                    isFolder: (properties[URLResourceKey.isDirectoryKey] as? NSNumber)?.boolValue ?? false,
-                    color: NSColor())
+                        name: properties[URLResourceKey.localizedNameKey] as? String ?? "",
+                        date: properties[URLResourceKey.contentModificationDateKey] as? Date ?? Date.distantPast,
+                        size: (properties[URLResourceKey.fileSizeKey] as? NSNumber)?.int64Value ?? 0,
+                        icon: properties[URLResourceKey.effectiveIconKey] as? NSImage  ?? NSImage(),
+                        isFolder: (properties[URLResourceKey.isDirectoryKey] as? NSNumber)?.boolValue ?? false,
+                        color: NSColor(),
+                        duration: dur!.doubleValue
+    )
   }
   catch {
     print("Error reading file attributes")

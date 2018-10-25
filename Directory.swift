@@ -75,7 +75,7 @@ public func urlToMetaData(url: URL) -> Metadata? {
                         icon: properties[URLResourceKey.effectiveIconKey] as? NSImage  ?? NSImage(),
                         isFolder: (properties[URLResourceKey.isDirectoryKey] as? NSNumber)?.boolValue ?? false,
                         color: NSColor(),
-                        duration: dur!.doubleValue
+                        duration: dur?.doubleValue ?? -1
     )
   }
   catch {

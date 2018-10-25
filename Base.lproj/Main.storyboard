@@ -663,6 +663,7 @@
                         </connections>
                     </window>
                     <connections>
+                        <outlet property="_tableController" destination="IQv-IB-iLA" id="G5b-bz-5pI"/>
                         <segue destination="XfG-lQ-9wD" kind="relationship" relationship="window.shadowedContentViewController" id="cq2-FE-JQM"/>
                     </connections>
                 </windowController>
@@ -954,6 +955,8 @@
                     </view>
                     <connections>
                         <outlet property="dropzone" destination="zYh-2E-kcH" id="ZbQ-ZS-EVL"/>
+                        <outlet property="minusButton" destination="NTY-H1-RqK" id="C8i-0X-rDD"/>
+                        <outlet property="previewButton" destination="b2J-10-fsT" id="rvr-0Q-mzl"/>
                         <outlet property="statusBar" destination="hal-cr-hVu" id="m8P-5d-neA"/>
                         <outlet property="statusLabel" destination="hal-cr-hVu" id="JeZ-FD-eYk"/>
                         <outlet property="tableView" destination="zA8-Dy-ebF" id="yeo-2g-ku9"/>

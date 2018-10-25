@@ -44,7 +44,9 @@ class ViewController: NSViewController {
   
   @IBOutlet var tableView: NSTableView!
   var movies = [Metadata]()
-
+  @IBOutlet var minusButton: NSButton!
+  @IBOutlet var previewButton: NSButton!
+  
   @IBOutlet var statusBar: NSTextField!
 
   override func viewDidLoad() {
@@ -57,6 +59,8 @@ class ViewController: NSViewController {
 
     tableView.register(forDraggedTypes: ["public.data"])
     tableView.allowsMultipleSelection = true
+    
+    reloadFileList()
   }
 
   override var representedObject: Any? {
@@ -132,15 +136,61 @@ class ViewController: NSViewController {
       previewFile(sender: self)
     }
   }
+  
+  func tableViewSelectionDidChange(_ notification: Notification) {
+    let table = notification.object as! NSTableView
+    print("sel \(table)")
+    
+    let numSelected = table.numberOfSelectedRows
+    let anySelected = numSelected > 0;
+    let anyMovies = movies.count > 0
+    
+    previewButton.isEnabled = anyMovies
+    minusButton.isEnabled = anySelected
+    
+    if anyMovies {
+      let byteFormatter = ByteCountFormatter()
+      let totalDuration = movies.reduce(0) {sum, movie in sum + movie.duration}
+      let totalSize = movies.reduce(0) {sum, movie in sum + movie.size}
+      
+      let durationText = formatDuration(duration: totalDuration)
+      let sizeText = byteFormatter.string(fromByteCount: totalSize)
+      
+      let totalText = "\(movies.count) movie\(movies.count > 1 ? "s" : ""), \(durationText), \(sizeText)"
+      
+      if numSelected > 1 {
+        let selectedText: String
+        if numSelected == movies.count {
+          selectedText = "all \(numSelected) selected"
+        } else {
+          let selectedDuration = table.selectedRowIndexes.reduce(0) { sum, idx in sum + movies[idx].duration }
+          let selectedSize     = table.selectedRowIndexes.reduce(0) { sum, idx in sum + movies[idx].size }
+          let selectedDurationText = formatDuration(duration: selectedDuration)
+          let selectedSizeText     = byteFormatter.string(fromByteCount: selectedSize)
+          selectedText = "\(numSelected) selected: \(selectedDurationText), \(selectedSizeText)"
+          previewButton.title = "Preview \(numSelected) movies"
+        }
+        statusBar.stringValue = "\(totalText) (\(selectedText))"
+        
+      } else {
+        statusBar.stringValue = totalText
+        if numSelected == 1 {
+          previewButton.title = "Preview 1 movie"
+        } else {
+          previewButton.title = "Preview all \(movies.count) movies"
+        }
+      }
+    } else {
+      // now preview button disabled
+      statusBar.stringValue = "No movies"
+      previewButton.title = "Preview"
+    }
+  }
 
   func reloadFileList() {
     tableView.reloadData()
-    let totalDuration = movies.reduce(0) {sum, movie in sum + movie.duration}
-    let totalSize = movies.reduce(0) {sum, movie in sum + movie.size}
-
-    let durationText = formatDuration(duration: totalDuration)
-    let sizeText = ByteCountFormatter().string(fromByteCount: totalSize)
-    statusBar.stringValue = "\(movies.count) movies, \(durationText), \(sizeText)"
+    
+    tableViewSelectionDidChange(Notification(name: NSNotification.Name.NSTableViewSelectionDidChange, object: tableView))
   }
   
   // MARK: Allow Drag Operation
@@ -184,11 +234,17 @@ class ViewController: NSViewController {
 
 extension ViewController: QLPreviewPanelDataSource {
   func previewPanel(_ panel: QLPreviewPanel!, previewItemAt index: Int) -> QLPreviewItem! {
-    return movies[tableView.selectedRowIndexes.sorted()[index]].url as QLPreviewItem
+    if tableView.numberOfSelectedRows > 1 {
+      return movies[tableView.selectedRowIndexes.sorted()[index]].url as QLPreviewItem
+    } else if tableView.numberOfSelectedRows == 1 {
+      return movies[((tableView.selectedRowIndexes.first ?? 0) + index) % movies.count].url as QLPreviewItem
+    } else {
+      return movies[index].url as QLPreviewItem
+    }
   }
   
   func numberOfPreviewItems(in panel: QLPreviewPanel!) -> Int {
-    return tableView.numberOfSelectedRows
+    return tableView.numberOfSelectedRows > 1 ? tableView.numberOfSelectedRows : movies.count
   }
   
 }

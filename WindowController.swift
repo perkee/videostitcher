@@ -26,7 +26,6 @@ import Cocoa
 class WindowController: NSWindowController {
 
   @IBAction func openDocument(_ sender: AnyObject?) {
-
     let openPanel = NSOpenPanel()
     openPanel.showsHiddenFiles = false
     openPanel.canChooseFiles = true
@@ -44,5 +43,4 @@ class WindowController: NSWindowController {
       self.contentViewController?.representedObject = openPanel.urls
     }
   }
-
 }

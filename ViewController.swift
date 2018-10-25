@@ -162,13 +162,18 @@ class ViewController: NSViewController {
         let selectedText: String
         if numSelected == movies.count {
           selectedText = "all \(numSelected) selected"
+          
+          previewButton.title = "Preview all \(movies.count) movies"
+          previewButton.sizeToFit()
         } else {
           let selectedDuration = table.selectedRowIndexes.reduce(0) { sum, idx in sum + movies[idx].duration }
           let selectedSize     = table.selectedRowIndexes.reduce(0) { sum, idx in sum + movies[idx].size }
           let selectedDurationText = formatDuration(duration: selectedDuration)
           let selectedSizeText     = byteFormatter.string(fromByteCount: selectedSize)
           selectedText = "\(numSelected) selected: \(selectedDurationText), \(selectedSizeText)"
+          
           previewButton.title = "Preview \(numSelected) movies"
+          previewButton.sizeToFit()
         }
         statusBar.stringValue = "\(totalText) (\(selectedText))"
         
@@ -176,8 +181,10 @@ class ViewController: NSViewController {
         statusBar.stringValue = totalText
         if numSelected == 1 {
           previewButton.title = "Preview 1 movie"
+          previewButton.sizeToFit()
         } else {
           previewButton.title = "Preview all \(movies.count) movies"
+          previewButton.sizeToFit()
         }
       }
     } else {

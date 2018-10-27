@@ -663,7 +663,6 @@
                         </connections>
                     </window>
                     <connections>
-                        <outlet property="_tableController" destination="IQv-IB-iLA" id="G5b-bz-5pI"/>
                         <segue destination="XfG-lQ-9wD" kind="relationship" relationship="window.shadowedContentViewController" id="cq2-FE-JQM"/>
                     </connections>
                 </windowController>

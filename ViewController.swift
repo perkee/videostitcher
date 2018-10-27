@@ -139,7 +139,6 @@ class ViewController: NSViewController {
   
   func tableViewSelectionDidChange(_ notification: Notification) {
     let table = notification.object as! NSTableView
-    print("sel \(table)")
     
     let numSelected = table.numberOfSelectedRows
     let anySelected = numSelected > 0;
@@ -163,8 +162,7 @@ class ViewController: NSViewController {
         if numSelected == movies.count {
           selectedText = "all \(numSelected) selected"
           
-          previewButton.title = "Preview all \(movies.count) movies"
-          previewButton.sizeToFit()
+          setPreviewButtonTitle("Preview all \(movies.count) movies")
         } else {
           let selectedDuration = table.selectedRowIndexes.reduce(0) { sum, idx in sum + movies[idx].duration }
           let selectedSize     = table.selectedRowIndexes.reduce(0) { sum, idx in sum + movies[idx].size }
@@ -172,32 +170,44 @@ class ViewController: NSViewController {
           let selectedSizeText     = byteFormatter.string(fromByteCount: selectedSize)
           selectedText = "\(numSelected) selected: \(selectedDurationText), \(selectedSizeText)"
           
-          previewButton.title = "Preview \(numSelected) movies"
-          previewButton.sizeToFit()
+          setPreviewButtonTitle("Preview \(numSelected) movies")
         }
         statusBar.stringValue = "\(totalText) (\(selectedText))"
         
       } else {
         statusBar.stringValue = totalText
         if numSelected == 1 {
-          previewButton.title = "Preview 1 movie"
-          previewButton.sizeToFit()
+          setPreviewButtonTitle("Preview 1 movie")
         } else {
-          previewButton.title = "Preview all \(movies.count) movies"
-          previewButton.sizeToFit()
+          setPreviewButtonTitle("Preview all \(movies.count) movies")
         }
       }
     } else {
       // now preview button disabled
       statusBar.stringValue = "No movies"
-      previewButton.title = "Preview"
+      setPreviewButtonTitle("Preview")
     }
+  }
+  
+  func setPreviewButtonTitle(_ string: String) {
+    previewButton.title = string;
+    previewButton.sizeToFit();
   }
 
   func reloadFileList() {
     tableView.reloadData()
     
     tableViewSelectionDidChange(Notification(name: NSNotification.Name.NSTableViewSelectionDidChange, object: tableView))
+  }
+
+  
+  override func acceptsPreviewPanelControl(_ panel: QLPreviewPanel!) -> Bool {
+    return true
+  }
+  
+  override func beginPreviewPanelControl(_ panel: QLPreviewPanel!) {
+    panel.delegate = self;
+    panel.dataSource = self;
   }
   
   // MARK: Allow Drag Operation

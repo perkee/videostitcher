@@ -102,9 +102,18 @@ class ViewController: NSViewController {
     dialog.canSelectHiddenExtension = true
 
     if dialog.runModal() == NSModalResponseOK {
-      let paths = movies.map { $0.url.path }.joined(separator: "\" \"")
+      let paths = movies.map { $0.url.path }.joined(separator: "' '")
       let dest = "\(dialog.url!.path).\(movies[0].url.pathExtension)"
-      print("/usr/local/bin/ffmpeg -copytb 1 -f concat -i <(for f in \"\( paths )\"; do echo \"file '$f'\"; done) -c copy \"\( dest )\";")
+      let command = "/usr/local/bin/ffmpeg -f concat -i <(for f in '\( paths )'; do echo \\\"file '$f'\\\"; done) -c copy '\( dest )';"
+      let script = "tell application \"Terminal\"\n\tactivate\n\tdo script with command \"\( command )\"\n\tend tell"
+      
+      var error: NSDictionary?
+      if let scriptObject = NSAppleScript(source: script) {
+        let output: NSAppleEventDescriptor = scriptObject.executeAndReturnError(&error)
+        print("output: \(output.stringValue ?? "none")")
+        print("error: \(error!)")
+      }
+      print(script)
     } else {
       print("bad save? \(dialog.url!)")
       return

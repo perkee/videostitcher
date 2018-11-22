@@ -34,7 +34,16 @@ public struct Metadata: CustomDebugStringConvertible, Equatable {
   let url: URL
   let duration: Double
 
-  init(fileURL: URL, name: String, date: Date, size: Int64, icon: NSImage, isFolder: Bool, color: NSColor, duration: Double ) {
+  init(
+    fileURL: URL,
+    name: String,
+    date: Date,
+    size: Int64,
+    icon: NSImage,
+    isFolder: Bool,
+    color: NSColor,
+    duration: Double
+  ) {
     self.name = name
     self.date = date
     self.size = size
@@ -51,9 +60,9 @@ public struct Metadata: CustomDebugStringConvertible, Equatable {
 
 }
 
-// MARK:  Metadata  Equatable
+// MARK: Metadata Equatable
 
-public func ==(lhs: Metadata, rhs: Metadata) -> Bool {
+public func == (lhs: Metadata, rhs: Metadata) -> Bool {
   return (lhs.url == rhs.url)
 }
 
@@ -77,14 +86,13 @@ public func urlToMetaData(url: URL) -> Metadata? {
                         color: NSColor(),
                         duration: dur?.doubleValue ?? -1
     )
-  }
-  catch {
+  } catch {
     print("Error reading file attributes")
     return nil
   }
 }
 
-public struct Directory  {
+public struct Directory {
 
   fileprivate var files: [Metadata] = []
   let url: URL
@@ -101,11 +109,12 @@ public struct Directory  {
                               URLResourceKey.typeIdentifierKey, URLResourceKey.contentModificationDateKey,
                               URLResourceKey.fileSizeKey, URLResourceKey.isDirectoryKey,
                               URLResourceKey.isPackageKey]
-    if let enumerator = FileManager.default.enumerator(at: folderURL,
-                                                       includingPropertiesForKeys: requiredAttributes,
-                                                       options: [.skipsHiddenFiles, .skipsPackageDescendants, .skipsSubdirectoryDescendants],
-                                                       errorHandler: nil) {
-
+    if let enumerator = FileManager.default.enumerator(
+      at: folderURL,
+      includingPropertiesForKeys: requiredAttributes,
+      options: [.skipsHiddenFiles, .skipsPackageDescendants, .skipsSubdirectoryDescendants],
+      errorHandler: nil
+    ) {
       while let url = enumerator.nextObject() as? URL {
         print( "Adding File: \(url)")
 
@@ -116,24 +125,35 @@ public struct Directory  {
     }
   }
 
-
   func contentsOrderedBy(_ orderedBy: FileOrder, ascending: Bool) -> [Metadata] {
     let sortedFiles: [Metadata]
     switch orderedBy {
     case .Name:
       sortedFiles = files.sorted {
-        return sortMetadata(lhsIsFolder:true, rhsIsFolder: true, ascending: ascending,
-                            attributeComparation:itemComparator(lhs:$0.name, rhs: $1.name, ascending:ascending))
+        return sortMetadata(
+          lhsIsFolder: true,
+          rhsIsFolder: true,
+          ascending: ascending,
+          attributeComparation: itemComparator(lhs: $0.name, rhs: $1.name, ascending: ascending)
+        )
       }
     case .Size:
       sortedFiles = files.sorted {
-        return sortMetadata(lhsIsFolder:true, rhsIsFolder: true, ascending:ascending,
-                            attributeComparation:itemComparator(lhs:$0.size, rhs: $1.size, ascending: ascending))
+        return sortMetadata(
+          lhsIsFolder: true,
+          rhsIsFolder: true,
+          ascending: ascending,
+          attributeComparation: itemComparator(lhs: $0.size, rhs: $1.size, ascending: ascending)
+        )
       }
     case .Date:
       sortedFiles = files.sorted {
-        return sortMetadata(lhsIsFolder:true, rhsIsFolder: true, ascending:ascending,
-                            attributeComparation:itemComparator(lhs:$0.date, rhs: $1.date, ascending:ascending))
+        return sortMetadata(
+          lhsIsFolder: true,
+          rhsIsFolder: true,
+          ascending: ascending,
+          attributeComparation: itemComparator(lhs: $0.date, rhs: $1.date, ascending: ascending)
+        )
       }
     }
     return sortedFiles
@@ -143,30 +163,32 @@ public struct Directory  {
 
 // MARK: - Sorting
 
-func sortMetadata(lhsIsFolder: Bool, rhsIsFolder: Bool,  ascending: Bool,
-                  attributeComparation: Bool ) -> Bool {
-  if( lhsIsFolder && !rhsIsFolder) {
-    return ascending ? true : false
-  }
-  else if ( !lhsIsFolder && rhsIsFolder ) {
-    return ascending ? false : true
+func sortMetadata(
+  lhsIsFolder: Bool,
+  rhsIsFolder: Bool,
+  ascending: Bool,
+  attributeComparation: Bool
+) -> Bool {
+  if lhsIsFolder && !rhsIsFolder {
+    return ascending
+  } else if !lhsIsFolder && rhsIsFolder {
+    return !ascending
   }
   return attributeComparation
 }
 
-func itemComparator<T:Comparable>( lhs: T, rhs: T, ascending: Bool ) -> Bool {
+func itemComparator<T: Comparable> (lhs: T, rhs: T, ascending: Bool) -> Bool {
   return ascending ? (lhs < rhs) : (lhs > rhs)
 }
 
-
-public func ==(lhs: Date, rhs: Date) -> Bool {
+public func == (lhs: Date, rhs: Date) -> Bool {
   if lhs.compare(rhs) == .orderedSame {
     return true
   }
   return false
 }
 
-public func <(lhs: Date, rhs: Date) -> Bool {
+public func < (lhs: Date, rhs: Date) -> Bool {
   if lhs.compare(rhs) == .orderedAscending {
     return true
   }

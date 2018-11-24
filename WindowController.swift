@@ -28,7 +28,7 @@ class WindowController: NSWindowController {
     let dialog = openPanel()
 
     dialog.beginSheetModal(for: self.window!) { response in
-      guard response == NSModalResponseOK else {
+      guard response == NSApplication.ModalResponse.OK else {
         return
       }
       self.contentViewController?.representedObject = dialog.urls

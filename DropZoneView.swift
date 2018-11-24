@@ -8,18 +8,19 @@
 
 import Cocoa
 
-let dragType = kUTTypeFileURL as String
+let dragType = NSPasteboard.PasteboardType(kUTTypeFileURL as String)
 
 class DropzoneView: NSView {
   var filesReceiver: NSViewController?
 
   required init?(coder decoder: NSCoder) {
     super.init(coder: decoder)
-    register(forDraggedTypes: [dragType])
+    registerForDraggedTypes([ dragType ])
   }
 
-  override func draggingEnded(_ sender: NSDraggingInfo?) {
-    if let urls = sender!.draggingPasteboard().propertyList(forType: "NSFilenamesPboardType") {
+  override func draggingEnded(_ sender: NSDraggingInfo) {
+    let type = NSPasteboard.PasteboardType("NSFilenamesPboardType")
+    if let urls = sender.draggingPasteboard.propertyList(forType: type) {
       Swift.print("urls", urls)
       if let urlStrings = (urls as? [String]) {
         Swift.print("url strings", urlStrings)

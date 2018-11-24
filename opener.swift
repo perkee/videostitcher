@@ -67,7 +67,7 @@ func openPanel() -> NSOpenPanel {
 }
 
 func getSelectedMovies(indices: IndexSet, movies: [Metadata]) -> [Metadata] {
-  return indices.flatMap { index in movies[index] }
+  return indices.compactMap { index in movies[index] }
 }
 
 func getTotalDurationSeconds(movies: [Metadata]) -> Double {

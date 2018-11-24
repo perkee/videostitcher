@@ -61,10 +61,9 @@ class ViewController: NSViewController {
     statusLabel.stringValue = ""
     tableView.delegate = self
     tableView.dataSource = self
-    // tableView.register(forDraggedTypes: ["public.data"])
     dropzone.filesReceiver = self
 
-    tableView.register(forDraggedTypes: ["public.data"])
+    tableView.registerForDraggedTypes([ NSPasteboard.PasteboardType("public.data") ])
     tableView.allowsMultipleSelection = true
 
     reloadFileList()
@@ -108,7 +107,7 @@ class ViewController: NSViewController {
     dialog.isExtensionHidden = false
     dialog.canSelectHiddenExtension = true
 
-    if dialog.runModal() == NSModalResponseOK {
+    if dialog.runModal() == NSApplication.ModalResponse.OK {
       concatMovies(movies: movies, path: dialog.url!.path)
     } else {
       print("bad save? \(dialog.url!)")
@@ -119,7 +118,7 @@ class ViewController: NSViewController {
   @IBAction func addFile(_ sender: Any) {
     let dialog = openPanel()
 
-    if dialog.runModal() == NSModalResponseOK {
+    if dialog.runModal() == NSApplication.ModalResponse.OK {
       movies += dialog.urls.map { urlToMetaData(url: $0)! }
       reloadFileList()
     } else {
@@ -131,7 +130,7 @@ class ViewController: NSViewController {
   override func keyDown(with event: NSEvent) {
     print("key down \(event.keyCode) \(event.isARepeat)")
     if !event.isARepeat && event.keyCode == 49 {
-      previewFile(sender: self)
+      previewFile(self)
     }
   }
 
@@ -190,7 +189,7 @@ class ViewController: NSViewController {
 
   func reloadFileList() {
     tableView.reloadData()
-    let notification = Notification(name: NSNotification.Name.NSTableViewSelectionDidChange, object: tableView)
+    let notification = Notification(name: NSTableView.selectionDidChangeNotification, object: tableView)
     tableViewSelectionDidChange(notification)
   }
 
@@ -209,7 +208,7 @@ class ViewController: NSViewController {
     do {
       let data = try NSKeyedArchiver.archivedData(withRootObject: rowIndexes, requiringSecureCoding: false)
       let item = NSPasteboardItem()
-      item.setData(data, forType: "public.data")
+      item.setData(data, forType: NSPasteboard.PasteboardType(rawValue: "public.data"))
       pboard.writeObjects([item])
       return true
     } catch {
@@ -222,9 +221,9 @@ class ViewController: NSViewController {
     _ tableView: NSTableView,
     validateDrop info: NSDraggingInfo,
     proposedRow row: Int,
-    proposedDropOperation dropOperation: NSTableViewDropOperation
+    proposedDropOperation dropOperation: NSTableView.DropOperation
   ) -> NSDragOperation {
-    guard let source = info.draggingSource() as? NSTableView,
+    guard let source = info.draggingSource as? NSTableView,
       source === tableView
       else {
         // invalid drop
@@ -241,10 +240,13 @@ class ViewController: NSViewController {
     _ tableView: NSTableView,
     acceptDrop info: NSDraggingInfo,
     row: Int,
-    dropOperation: NSTableViewDropOperation
+    dropOperation: NSTableView.DropOperation
   ) -> Bool {
     if
-      let itemData = info.draggingPasteboard().pasteboardItems?.first?.data(forType: "public.data"),
+      let itemData = info.draggingPasteboard.pasteboardItems?.first?.data(
+        forType: NSPasteboard.PasteboardType(rawValue: "public.data")
+      ),
+      // let indices = try NSKeyedUnarchiver.unarchivedObject(ofClasses: Metadata.class, from: itemData) as? [IndexSet],
       let indexes = NSKeyedUnarchiver.unarchiveObject(with: itemData) as? IndexSet {
       movies.move(with: indexes, to: row)
       let targetIndex = row - (indexes.filter { $0 < row }.count)
@@ -318,7 +320,10 @@ extension ViewController: NSTableViewDelegate {
     }
 
     // 3
-    if let cell = tableView.make(withIdentifier: cellIdentifier, owner: nil) as? NSTableCellView {
+    if let cell = tableView.makeView(
+      withIdentifier: NSUserInterfaceItemIdentifier(rawValue: cellIdentifier),
+      owner: nil
+    ) as? NSTableCellView {
       cell.textField?.stringValue = text
       cell.imageView?.image = image ?? nil
       return cell
